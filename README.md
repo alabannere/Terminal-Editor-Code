@@ -1,25 +1,25 @@
-# Terminal Code Editor en Python
+# Terminal Code Editor in Python
 
-## Descripción
-Este es un editor de código/texto desarrollado en Python, versión 1.0.1. Aunque está en una etapa temprana de desarrollo, tiene como objetivo proporcionar una experiencia similar a la de nano, con la capacidad de cambiar entre dos modos: modo edición y modo comando.
+## Description
+This is a code/text editor developed in Python, version 1.0.1. Although it's in an early stage of development, it aims to provide an experience similar to nano, with the ability to switch between two modes: edit mode and command mode.
 
-## Problemas Conocidos
-- Actualmente, el resaltado de sintaxis no funciona correctamente para los cierres de etiquetas.
-- Al crear una nueva línea mientras se está en la última línea del archivo, hay un problema con el desplazamiento que impide que la pantalla se desplace hacia abajo.
+## Known Issues
+- Currently, syntax highlighting does not work properly for tag closures.
+- When creating a new line while being on the last line of the file, there is an issue with scrolling that prevents the screen from scrolling downwards.
 
-## Modo de Comandos
-El modo de comandos se activa con la combinación de teclas Ctrl + X. En este modo, puedes ejecutar varios comandos, como:
-- `ins <número de línea> <texto>`: Inserta una línea con el texto especificado en la línea indicada.
-- `del <número de línea>`: Elimina la línea especificada.
-- `save`: Guarda el archivo.
-- `find <texto>`: Busca un texto en el archivo.
-- `go toline <número de línea>`: Te lleva a la línea especificada.
+## Command Mode
+Command mode is activated with the key combination Ctrl + X. In this mode, you can execute various commands, such as:
+- `ins <line number> <text>`: Inserts a line with the specified text at the indicated line.
+- `del <line number>`: Deletes the specified line.
+- `save`: Saves the file.
+- `find <text>`: Searches for text in the file.
+- `go toline <line number>`: Takes you to the specified line.
 
-## Autor
+## Author
 - Alejandro Labannere
+  
+## Contributing
+If you have ideas to improve this editor, you're welcome to contribute! Feel free to submit pull requests or report issues.
 
-## Contribuir
-¡Si tienes ideas para mejorar este editor, eres bienvenido a contribuir! Siéntete libre de enviar solicitudes de extracción o informar problemas.
-
-## Licencia
-Este proyecto está bajo la Licencia MIT. Consulta el archivo LICENSE para obtener más detalles.
+## License
+This project is under the MIT License. See the LICENSE file for more details.
