@@ -1,6 +1,6 @@
 # Autor: Alejandro Labannere
 # Fecha: 13/02/2024
-# version: 1.0
+# Version 1.1
 
 import argparse
 import curses
@@ -150,42 +150,94 @@ def highlight_code(stdscr, buffer, language, window):
     # Define las palabras clave según el lenguaje seleccionado
     if language == 'html':
         keywords = HTML_KEYWORDS
+        comment_color_pair = 1  # Define un color para los comentarios HTML
+        attribute_color_pair = 2  # Define un color para los atributos HTML
+        value_color_pair = 3     # Define un color para los valores de los atributos HTML
+
     elif language == 'python':
         keywords = PYTHON_KEYWORDS
+        comment_color_pair = 2  # Define un color para los comentarios Python si es necesario
     else:
         keywords = set()  # Si el lenguaje no está definido, no hay palabras clave
+        comment_color_pair = 2  # Define un color por defecto para los comentarios
+        attribute_color_pair = 4  # Define un color para los atributos HTML si es necesario
+        value_color_pair = 5     # Define un color para los valores de los atributos HTML si es necesario
 
     # Recorre cada línea del buffer
     for row, line in enumerate(buffer[window.row:window.row + window.n_rows]):
-        # Busca todas las palabras y etiquetas HTML en la línea
-        words = re.findall(r'<\/?[^>]+>', line)
         col_offset = 0  # Inicializa el offset de la columna
+
+        # Busca todas las etiquetas HTML
+        words = re.findall(r'<\/?[^>]+>', line)
+        # Busca comentarios HTML
+        comments = re.findall(r'<!--.*?-->', line)
+        # Busca atributos y valores
+        attributes_values = re.findall(r'(\w+)(="[^"]*")?', line)
+
+        # Resalta los comentarios HTML
+        for comment in comments:
+            col = line.find(comment, col_offset)
+            if col != -1:  # Si se encontró el comentario
+                adjusted_col = col - window.col
+                if adjusted_col >= 0:
+                    stdscr.addstr(row + 2, adjusted_col + 6, comment, curses.color_pair(comment_color_pair))
+                col_offset = col + len(comment)
+
+        # Resalta las etiquetas HTML
         for word in words:
-            # Si la palabra es una etiqueta HTML, resáltala
-            if word.lower() in keywords:
-                # Encuentra la posición de la palabra en la línea
+            if any(keyword.lower() in word.lower() for keyword in keywords):
                 col = line.lower().find(word.lower(), col_offset)
                 if col != -1:  # Si se encontró la palabra
-                    # Ajusta la posición de la palabra resaltada para tener en cuenta el desplazamiento horizontal
                     adjusted_col = col - window.col
                     if adjusted_col >= 0:
-                        # Resalta la palabra utilizando colores si está dentro de la ventana
-                        stdscr.addstr(row + 2, adjusted_col + 6, word, curses.color_pair(3))
-                    # Actualiza el offset de la columna para buscar la próxima palabra
+                        stdscr.addstr(row + 2, adjusted_col + 6, word, curses.color_pair(4))
                     col_offset = col + len(word)
 
+        # Resalta los atributos y valores
+        for attr, val in attributes_values:
+            # Resalta el atributo
+            if attr:
+                attr_start = line.find(attr, col_offset)
+                if attr_start != -1:
+                    adjusted_col = attr_start - window.col
+                    if adjusted_col >= 0:
+                        stdscr.addstr(row + 2, adjusted_col + 6, attr, curses.color_pair(attribute_color_pair))
+                col_offset = attr_start + len(attr)
+
+            # Resalta el signo '='
+            if val:
+                equal_sign_start = line.find('=', col_offset)
+                if equal_sign_start != -1:
+                    adjusted_col = equal_sign_start - window.col
+                    if adjusted_col >= 0:
+                        stdscr.addstr(row + 2, adjusted_col + 6, '=', curses.color_pair(5))
+                col_offset = equal_sign_start + 1  # Avanza después del '='
+
+                # Resalta el valor
+                val_start = line.find(val, col_offset)
+                if val_start != -1:
+                    adjusted_col = val_start - window.col
+                    if adjusted_col >= 0:
+                        stdscr.addstr(row + 2, adjusted_col + 6, val, curses.color_pair(value_color_pair))
+                col_offset = val_start + len(val)
 
 def main(stdscr, filename, buffer, language):
     # Inicializar pares de colores
     curses.start_color()
 
-    # Definir un color personalizado en RGB
-    curses.init_color(1, 0, 0, 0)  # 2 - NEGRO FONDO
-    curses.init_color(2, 1000, 1000, 1000)  # Definir un gris más claro
+    # Definir colores personalizados en RGB
+    curses.init_color(1, 0, 0, 0)      # Negro (para fondo)
+    curses.init_color(2, 1000, 1000, 1000)  # Gris claro (para atributos y valores)
+    curses.init_color(3, 500, 500, 1000)  # Azul claro (para etiquetas HTML)
+    curses.init_color(4, 1000, 500, 500)  # Rojo claro (para comentarios)
+    curses.init_color(5, 1000, 1000, 1000)  # Blanco (para valores, por ejemplo)
 
-    curses.init_pair(3, curses.COLOR_CYAN, curses.COLOR_BLACK)
-    curses.init_pair(2, 2, curses.COLOR_BLACK)  # Definir un par de colores con texto blanco y fondo negro
-    curses.init_pair(1, curses.COLOR_WHITE, curses.COLOR_BLACK)  # Definir un par de colores con texto blanco y fondo negro
+    # Inicializar pares de colores
+    curses.init_pair(1, curses.COLOR_WHITE, 1)  # Texto blanco sobre fondo negro
+    curses.init_pair(2, 2, curses.COLOR_BLACK)  # Texto gris claro sobre fondo negro (atributos y valores)
+    curses.init_pair(3, 3, curses.COLOR_BLACK)  # Texto azul claro sobre fondo negro (etiquetas HTML)
+    curses.init_pair(4, 4, curses.COLOR_BLACK)  # Texto rojo claro sobre fondo negro (comentarios)
+    curses.init_pair(5, 5, 1)  # Texto rojo claro sobre fondo negro (comentarios)
 
     # Obtener el tamaño de la pantalla inicial
     height, width = stdscr.getmaxyx()
