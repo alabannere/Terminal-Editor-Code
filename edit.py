@@ -1,5 +1,6 @@
 # Autor: Alejandro Labannere
 # Fecha: 13/02/2024
+# version: 1.0
 
 import argparse
 import curses
